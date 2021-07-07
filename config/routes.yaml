@@ -1,0 +1,6 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+spotify:
+    path: /spotify
+    controller: App\Controller\SpotifyController::index

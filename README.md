@@ -26,3 +26,7 @@ sudo apt-get install -y nodejs gconf-service libasound2 libatk1.0-0 libc6 libcai
 sudo npm install --global --unsafe-perm puppeteer
 sudo chmod -R o+rx /usr/lib/node_modules/puppeteer/.local-chromium
 ```
+## Execute command
+```bash
+bin/console crawl:spotify
+```

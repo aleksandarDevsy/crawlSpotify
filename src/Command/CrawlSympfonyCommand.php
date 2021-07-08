@@ -52,12 +52,12 @@ class CrawlSympfonyCommand extends Command
                     $descHtml = \file_get_contents('https://www.lifeatspotify.com'.$job['url']);
                     $descCraw = new Crawler($descHtml);
                     // scan html that is in ".singlejob_introText__2Qm_D" div  and  ".singlejob_descriptionText__2M45Z" div for description 
-                /* $job['desc'] = array_merge ( $descCraw->filter('.singlejob_introText__2Qm_D > div')->each(function (Crawler $node, $i){
+                 $job['desc'] = array_merge ( $descCraw->filter('.singlejob_introText__2Qm_D > div')->each(function (Crawler $node, $i){
                         return strip_tags($node->html());
                     }),
                     $descCraw->filter('.singlejob_descriptionText__2M45Z > div')->each(function (Crawler $node, $i){
                         return strip_tags($node->html());
-                    })); */
+                    })); 
                     // Search if in text is mentioned years of so we can get years of experience
                     $job['yearsExperience'] = array_values(array_filter($descCraw->filter('ul.list_list__mHc5U')->each(function (Crawler $node, $i){
                         $ye = strstr( $node->getNode(0)->textContent, 'years of',true);

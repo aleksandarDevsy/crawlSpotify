@@ -4,11 +4,12 @@ namespace App\Services;
 use Spatie\Browsershot\Browsershot;
 use Symfony\Component\DomCrawler\Crawler;
 
-class CrawlerSpotifyJob
+class CrawlerSpotifyJob implements CrawlerSpotifyJobInterface
 {
-    function __construct($url) {
-        $this->url = $url;
-        $response = Browsershot::url($url.'/jobs')                
+    const SPOTIFY_URL = "https://www.lifeatspotify.com";
+
+    function __construct() {
+        $response = Browsershot::url(self::SPOTIFY_URL.'/jobs')                
                 ->windowSize(1200, 800)
                 ->click(".select_arrow__2COPq",'left',1,1000) // open select input
                 ->delay(2000)
@@ -27,7 +28,7 @@ class CrawlerSpotifyJob
             $job = [];
             // get name and url from 
             $job['name'] = $node->filter('a')->text(); // get name
-            $job['url'] = $this->url.$node->filter('a')->attr('href'); // get url
+            $job['url'] = self::SPOTIFY_URL.$node->filter('a')->attr('href'); // get url
             $job['desc'] = '';
             return $job;
         });
@@ -49,5 +50,14 @@ class CrawlerSpotifyJob
             $desc.= $descCraw->filter('.singlejob_descriptionText__2M45Z > div > span')->text();
         
         return $desc;
+    }
+
+    function getContentData($url) {
+        $data = new Crawler(\file_get_contents($url));
+        // Get text from lists from job page
+        $text = $data->filter('ul.list_list__mHc5U')->each(function (Crawler $node, $i){
+            return $node->text();
+        });
+        return implode(" ",$text);
     }
 }

@@ -10,29 +10,29 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use App\Services\CrawlerSpotifyJob;
-use App\Services\SpotifyJobExperienceService;
+use App\Services\CrawlerSpotifyJobInterface;
+use App\Services\SpotifyJobExperienceServiceInterface;
 
 class CrawlSympfonyCommand extends Command
 {
     protected static $defaultName = 'crawl:spotify';
     protected static $defaultDescription = 'Get jobs from Spotify for Sweeden';
+    const EXPERIENCE_KEYWORDS = ['experienced','deep knowledge','experience','leadership'];
 
-    protected function configure(): void
-    {
+    function __construct(CrawlerSpotifyJobInterface $crawlerSpotifyJob,SpotifyJobExperienceServiceInterface $spotifyJobExperienceService) {
+        $this->crawlerSpotifyJob = $crawlerSpotifyJob;
+        $this->spotifyJobExperienceService = $spotifyJobExperienceService;
+        parent::__construct();
     }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $crawlerSpotifyJob = new CrawlerSpotifyJob("https://www.lifeatspotify.com");
-        $jobs = $crawlerSpotifyJob->listJobs();
+        $jobs = $this->crawlerSpotifyJob->listJobs();
         foreach($jobs as $key => $job)
         {
-            $checkWords = ['experienced','deep knowledge','experience','leadership']; // list of words
-            $crawlerSpotifyJobExperienceService = new SpotifyJobExperienceService($job['url']);
-            $jobs[$key]['desc'] = $crawlerSpotifyJob->getJobDescription($job);
-            $jobs[$key]['yearsExperience'] = $crawlerSpotifyJobExperienceService->getYearsOfExperience();
-            $jobs[$key]['experienced'] = $crawlerSpotifyJobExperienceService->determineExperiencedJob($checkWords);
+            $jobContent = $this->crawlerSpotifyJob->getContentData($job['url']);
+            $jobs[$key]['desc'] = $this->crawlerSpotifyJob->getJobDescription($job);
+            $jobs[$key]['yearsExperience'] = $this->spotifyJobExperienceService->getYearsOfExperience($jobContent);
+            $jobs[$key]['experienced'] = $this->spotifyJobExperienceService->determineExperiencedJob(self::EXPERIENCE_KEYWORDS,$jobContent);
         }
        
         $io = new SymfonyStyle($input, $output);
